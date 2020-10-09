@@ -55,12 +55,15 @@ const rollupConfigPath = path.join(projectRoot, 'rollup.config.js')
 let rollupConfig = fs.readFileSync(rollupConfigPath, 'utf8')
 
 // Edit imports
-rollupConfig = rollupConfig.replace('\'rollup-plugin-terser\';', `'rollup-plugin-terser';
+rollupConfig = rollupConfig.replace(
+  "'rollup-plugin-terser';",
+  `'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
-import typescript from '@rollup/plugin-typescript';`)
+import typescript from '@rollup/plugin-typescript';`
+)
 
 // Replace name of entry point
-rollupConfig = rollupConfig.replace('\'src/main.js\'', '\'src/main.ts\'')
+rollupConfig = rollupConfig.replace("'src/main.js'", "'src/main.ts'")
 
 // Add preprocess to the svelte config, this is tricky because there's no easy signifier.
 // Instead we look for `css:` then the next `}` and add the preprocessor to that
@@ -68,7 +71,7 @@ let foundCSS = false
 let match
 
 // https://regex101.com/r/OtNjwo/1
-const configEditor = new RegExp(/css:.|\n*}/gmi)
+const configEditor = new RegExp(/css:.|\n*}/gim)
 while ((match = configEditor.exec(rollupConfig)) != null) {
   if (foundCSS) {
     const endOfCSSIndex = match.index + 1
@@ -79,10 +82,7 @@ while ((match = configEditor.exec(rollupConfig)) != null) {
 }
 
 // Add TypeScript
-rollupConfig = rollupConfig.replace(
-  'commonjs(),',
-  'commonjs(),\n\t\ttypescript({\n\t\t\tsourceMap: !production,\n\t\t\tinlineSources: !production\n\t\t}),',
-)
+rollupConfig = rollupConfig.replace('commonjs(),', 'commonjs(),\n\t\ttypescript({\n\t\t\tsourceMap: !production,\n\t\t\tinlineSources: !production\n\t\t}),')
 fs.writeFileSync(rollupConfigPath, rollupConfig)
 
 // Add TSConfig
@@ -115,10 +115,13 @@ if (!argv[2]) {
 
 // Adds the extension recommendation
 fs.mkdirSync(path.join(projectRoot, '.vscode'))
-fs.writeFileSync(path.join(projectRoot, '.vscode', 'extensions.json'), `{
+fs.writeFileSync(
+  path.join(projectRoot, '.vscode', 'extensions.json'),
+  `{
   "recommendations": ["svelte.svelte-vscode"]
 }
-`)
+`
+)
 
 console.log('Converted to TypeScript.')
 
