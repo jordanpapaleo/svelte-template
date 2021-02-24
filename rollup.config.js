@@ -1,10 +1,23 @@
-import svelte from 'rollup-plugin-svelte'
-import resolve from '@rollup/plugin-node-resolve'
+import { terser } from 'rollup-plugin-terser'
+import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
 import livereload from 'rollup-plugin-livereload'
-import { terser } from 'rollup-plugin-terser'
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+import svelte from 'rollup-plugin-svelte'
 
 const production = !process.env.ROLLUP_WATCH
+const API_ROOT = production ? '' : 'http://localhost:5001'
+
+const aliases = alias({
+  // optional, by default this will just look for .js files or folders
+  resolve: ['.svelte', '.js'],
+  entries: [
+    { find: 'views', replacement: 'src/views' },
+    { find: 'components', replacement: 'src/components' },
+    { find: 'utils', replacement: 'src/utils' },
+  ],
+})
 
 function serve() {
   let server
@@ -36,6 +49,12 @@ export default {
     file: 'public/build/bundle.js',
   },
   plugins: [
+    aliases,
+    replace({
+      process: JSON.stringify({
+        env: { API_ROOT: API_ROOT },
+      }),
+    }),
     svelte({
       // enable run-time checks when not in production
       dev: !production,
